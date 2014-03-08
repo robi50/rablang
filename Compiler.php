@@ -18,9 +18,7 @@ class Compiler{
 		foreach($tree as $element){
 			$this->output .= $this->translate($element);
 		}
-
-		echo $this->output;
-
+		
 		return $this->output;
 	}
 
