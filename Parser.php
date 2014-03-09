@@ -94,7 +94,11 @@ class Parser{
 				$tree = ['type' => 'print', 'values' => []];
 
 				if($d = $this->tokenizer->match([R_IDENTIFIER, R_STRING, R_INTEGER])){
-					$tree['values'][] = $d[0][1];
+					$tree['values'][] = $d[0];	
+
+					while($d = $this->tokenizer->match(R_DOT, [R_IDENTIFIER, R_STRING])){
+						$tree['values'][] = $d[1];	
+					}
 				}
 
 				return $tree;

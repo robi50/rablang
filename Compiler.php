@@ -34,9 +34,9 @@ class Compiler{
 				$output .= sprintf('const %s = "%s";', $n, $v);
 			}
 		}elseif($element['type'] == 'print'){
-			foreach($element['values'] as $v){
-				$output .= (preg_match('/^[A-Z]+$/', $v) ? sprintf('echo %s;', $v) : sprintf('echo $%s;', $v));
-			}
+			$output .= sprintf('echo %s;', implode('.', array_map(function($v){
+				return $this->tokenToValue($v);
+			}, $element['values'])));
 		}elseif($element['type'] == 'enum'){
 			$i = 0;
 
@@ -63,7 +63,7 @@ class Compiler{
 	private function tokenToValue($t){	
 		if($t[0] == R_INTEGER) return $t[1];
 		if($t[0] == R_STRING) return '"'. $t[1] .'"';
-		if($t[0] == R_IDENTIFIER) return '$'. $t[1];
+		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z]+$/', $t[1])) ? $t[1] : '$'. $t[1];
 	}
 
 }
