@@ -1,0 +1,5 @@
+var sayMyName = function(name){
+	print "your name is " . name;
+}
+
+sayMyName("robin");
