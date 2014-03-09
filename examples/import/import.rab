@@ -1,0 +1,5 @@
+import "Rab"
+from "lib" import "Rab";
+
+print "this value came from Rab.php: " . rab . "<br />";
+print "this value came from lib/Rab.php: " . Rab;
