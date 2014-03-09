@@ -1,6 +1,6 @@
 <?php
 
-require '../Lang.php';
+require '../../Lang.php';
 
 use \Rab\Lang;
 
