@@ -2,7 +2,7 @@
 
 namespace Rab;
 
-require 'CompilerH.php';
+require 'tokens.php';
 require 'Tokenizer.php';
 require 'Parser.php';
 require 'Compiler.php';
