@@ -144,7 +144,7 @@ class Tokenizer{
 		while($this->i < $this->len){
 			$c = $this->source[$this->i];
 
-			if(ctype_alnum($c)){
+			if(preg_match('/^[a-zA-Z0-9_]+$/', $c)){
 				$this->i++;
 				$this->buffer .= $c;
 			}else{
