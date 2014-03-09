@@ -10,6 +10,7 @@ const R_ENUM = 16;
 const R_FUNCTION = 23;
 const R_RETURN = 24;
 const R_NAMESPACE = 25;
+const R_IMPORT = 26;
 
 const R_COMA = 3;
 const R_DOT = 4;

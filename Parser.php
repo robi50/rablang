@@ -135,6 +135,15 @@ class Parser{
 
 				break;
 
+			case R_IMPORT:
+				if($d = $this->tokenizer->match(R_STRING)){
+					$tree = ['type' => 'import', 'path' => $d[0][1]];
+
+					return $tree;
+				}
+
+				break;
+
 		}
 	}
 

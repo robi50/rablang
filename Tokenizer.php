@@ -159,6 +159,7 @@ class Tokenizer{
 		if($this->buffer == 'enum') return [R_ENUM];
 		if($this->buffer == 'return') return [R_RETURN];
 		if($this->buffer == 'namespace') return [R_NAMESPACE];
+		if($this->buffer == 'import') return [R_IMPORT];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}
