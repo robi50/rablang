@@ -144,6 +144,21 @@ class Parser{
 
 				break;
 
+			case R_FROM:
+				if($d = $this->tokenizer->match(R_STRING, R_IMPORT, R_STRING)){
+					$tree = ['type' => 'importFrom', 'path' => $d[0][1], 'files'];
+					$tree['files'][] = $d[2][1];
+
+					while($d = $this->tokenizer->match(R_COMA, R_STRING)){
+						$tree['files'][] = $d[1][1];
+					}
+
+					print_r($tree);
+
+					return $tree;
+				}
+				break;
+
 		}
 	}
 

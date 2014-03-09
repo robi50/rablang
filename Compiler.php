@@ -74,8 +74,14 @@ class Compiler{
 			$output .= sprintf('namespace %s; %s', $element['name'], implode('', array_map(function($e){
 				return $this->translate($e);
 			}, $element['inner'])));
-		}elseif($element['type'] == 'import'){
+		}
+		// import "foo";
+		elseif($element['type'] == 'import'){
 			$output .= sprintf('require "%s.php";', implode('/', explode('.', $element['path'])));
+		}elseif($element['type'] == 'importFrom'){
+			foreach($element['files'] as $f){
+				$output .= sprintf('require "%s.php";', implode('/', explode('.', $element['path'])).'/'.$f);
+			}
 		}
 
 		return $output;
