@@ -88,7 +88,7 @@ class Compiler{
 	private function tokenToValue($t){	
 		if($t[0] == R_INTEGER) return $t[1];
 		if($t[0] == R_STRING) return '"'. $t[1] .'"';
-		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z]+$/', $t[1])) ? $t[1] : '$'. $t[1];
+		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $t[1])) ? $t[1] : '$'. $t[1];
 	}
 
 }
