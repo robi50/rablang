@@ -18,7 +18,7 @@ class Compiler{
 		foreach($tree as $element){
 			$this->output .= $this->translate($element);
 		}
-		
+
 		return $this->output;
 	}
 
@@ -69,15 +69,21 @@ class Compiler{
 		elseif($element['type'] == 'return'){
 			$output .= sprintf('return %s;', $this->tokenToValue($element['value']));
 		}
+		// namespace foo{}
+		elseif($element['type'] == 'namespace'){
+			$output .= sprintf('namespace %s; %s', $element['name'], implode('', array_map(function($e){
+				return $this->translate($e);
+			}, $element['inner'])));
+		}
 
 		return $output;
 	}
 
 	/* 
-		2 => 2;
+		2 => 2
 		foo fo ao => "foo fo ao"
-		name => $name;
-		NAME => NAME;
+		name => $name
+		NAME => NAME
 	*/
 	private function tokenToValue($t){	
 		if($t[0] == R_INTEGER) return $t[1];

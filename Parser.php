@@ -126,6 +126,16 @@ class Parser{
 
 				break;
 
+			case R_NAMESPACE:
+				if($d = $this->tokenizer->match(R_IDENTIFIER, R_LCBRACKET)){
+					$tree = ['type' => 'namespace', 'name' => $d[0][1]];
+					$tree['inner'] = $this->parse(R_RCBRACKET);
+
+					return $tree;
+				}	
+
+				break;
+
 		}
 	}
 

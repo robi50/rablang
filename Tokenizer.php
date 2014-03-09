@@ -158,6 +158,7 @@ class Tokenizer{
 		if($this->buffer == 'function') return [R_FUNCTION];
 		if($this->buffer == 'enum') return [R_ENUM];
 		if($this->buffer == 'return') return [R_RETURN];
+		if($this->buffer == 'namespace') return [R_NAMESPACE];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}
