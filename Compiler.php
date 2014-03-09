@@ -25,41 +25,60 @@ class Compiler{
 	private function translate($element){
 		$output = '';
 
+		// var foo = "robin";
 		if($element['type'] == 'defineVar'){
 			foreach($element['variables'] as $n => $v){
 				$output .= sprintf('$%s = %s;', $n, $this->tokenToValue($v));
 			}
-		}elseif($element['type'] == 'defineConst'){
+		}
+		// const FOO = 2;
+		elseif($element['type'] == 'defineConst'){
 			foreach($element['variables'] as $n => $v){
 				$output .= sprintf('const %s = "%s";', $n, $v);
 			}
-		}elseif($element['type'] == 'print'){
+		}
+		// print foo;
+		elseif($element['type'] == 'print'){
 			$output .= sprintf('echo %s;', implode('.', array_map(function($v){
 				return $this->tokenToValue($v);
 			}, $element['values'])));
-		}elseif($element['type'] == 'enum'){
+		}
+		// enum{F, O, o}
+		elseif($element['type'] == 'enum'){
 			$i = 0;
 
 			foreach($element['values'] as $v){
 				$output .= sprintf('const %s = %d;', $v, $i++);
 			}
-		}elseif($element['type'] == 'defineFunction'){
+		}
+		// var foo = function(){}
+		elseif($element['type'] == 'defineFunction'){
 			$output .= sprintf('function %s(%s){%s}', $element['name'], implode(',', array_map(function($v){
 				return sprintf('%s', $this->tokenToValue($v));
 			}, $element['args'])),implode('', array_map(function($e){
 				return $this->translate($e);
 			}, $element['inner'])));
-		}elseif($element['type'] == 'callFunction'){
+		}
+		// foo();
+		elseif($element['type'] == 'callFunction'){
 			$output .= sprintf('%s(%s);', $element['name'], implode(',', array_map(function($v){
 				return sprintf('%s', $this->tokenToValue($v));
 			}, $element['args'])));
-		}elseif($element['type'] == 'return'){
+		}
+		// return foo;
+		elseif($element['type'] == 'return'){
 			$output .= sprintf('return %s;', $this->tokenToValue($element['value']));
 		}
 
 		return $output;
 	}
 
+	/* 
+		2 => 2;
+		name => $name;
+		NAME => NAME;
+		foo fo ao => "foo fo ao"
+	*/
 	private function tokenToValue($t){	
 		if($t[0] == R_INTEGER) return $t[1];
 		if($t[0] == R_STRING) return '"'. $t[1] .'"';
