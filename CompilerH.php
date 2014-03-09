@@ -7,9 +7,9 @@ const R_VAR = 0;
 const R_PRINT = 11;
 const R_CONST = 13;
 const R_ENUM = 16;
-const R_FUNCTION = 29;
-const R_RETURN = 30;
-const R_NAMESPACE = 31;
+const R_FUNCTION = 23;
+const R_RETURN = 24;
+const R_NAMESPACE = 25;
 
 const R_COMA = 3;
 const R_DOT = 4;
