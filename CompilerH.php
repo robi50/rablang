@@ -9,6 +9,7 @@ const R_CONST = 13;
 const R_ENUM = 16;
 const R_FUNCTION = 29;
 const R_RETURN = 30;
+const R_NAMESPACE = 31;
 
 const R_COMA = 3;
 const R_DOT = 4;
