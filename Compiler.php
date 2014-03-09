@@ -28,7 +28,9 @@ class Compiler{
 		// var foo = "robin";
 		if($element['type'] == 'defineVar'){
 			foreach($element['variables'] as $n => $v){
-				$output .= sprintf('$%s = %s;', $n, $this->tokenToValue($v));
+				$output .= sprintf('$%s = %s;', $n, implode('.', array_map(function($vv){
+					return $this->tokenToValue($vv);
+				}, $v)));
 			}
 		}
 		// const FOO = 2;

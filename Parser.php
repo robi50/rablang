@@ -28,11 +28,19 @@ class Parser{
 			case R_VAR:
 				if($d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
 					$tree = ['type' => 'defineVar', 'variables' => []];
-					$tree['variables'][$d[0][1]] = $d[2];
+					$tree['variables'][$d[0][1]] = [$d[2]];
+
+					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+						$tree['variables'][$d[0][1]][] = $j[1];
+					}
 
 					while($this->tokenizer->match(R_COMA)){
 						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER]);
-						$tree['variables'][$d[0][1]] = $d[2];
+						$tree['variables'][$d[0][1]] = [$d[2]];
+
+						while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+							$tree['variables'][$d[0][1]][] = $j[1];
+						}
 					}
 
 					return $tree;
