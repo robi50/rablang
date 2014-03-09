@@ -153,8 +153,6 @@ class Parser{
 						$tree['files'][] = $d[1][1];
 					}
 
-					print_r($tree);
-
 					return $tree;
 				}
 				break;
