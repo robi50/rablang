@@ -1,4 +1,4 @@
-import "Rab"
+import "Rab";
 from "lib" import "Rab";
 
 print "this value came from Rab.php: " . rab . "<br />";
