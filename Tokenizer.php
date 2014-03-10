@@ -151,7 +151,7 @@ class Tokenizer{
 				break;
 			}
 		}
-
+	
 		if($this->buffer == 'print') return [R_PRINT];
 		if($this->buffer == 'const') return [R_CONST];
 		if($this->buffer == 'function') return [R_FUNCTION];
@@ -162,6 +162,7 @@ class Tokenizer{
 		if($this->buffer == 'from') return [R_FROM];
 		if($this->buffer == 'true') return [R_BOOLEAN, 'true'];
 		if($this->buffer == 'false') return [R_BOOLEAN, 'false'];
+		if($this->buffer == 'loop') return [R_LOOP];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}

@@ -235,6 +235,15 @@ class Parser{
 				}
 				break;
 
+			case R_LOOP:
+				if($d = $this->tokenizer->match(R_LBRACKET, R_INTEGER, R_RBRACKET, R_LCBRACKET)){
+					$tree = ['type' => 'loop', 'limit' => $d[1][1]];
+					$tree['inner'] = $this->parse(R_RCBRACKET);
+					
+					return $tree;
+				}
+				break;
+
 		}
 	}
 

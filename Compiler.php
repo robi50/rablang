@@ -91,6 +91,12 @@ class Compiler{
 				$output .= sprintf('require "%s.php";', implode('/', explode('.', $element['path'])).'/'.$f);
 			}
 		}
+		// loop(5){print "foo";}
+		elseif($element['type'] == 'loop'){
+			$output .= sprintf('for($i=0;$i<%s;$i++){%s}', $element['limit'], implode('', array_map(function($e){
+				return $this->translate($e);
+			}, $element['inner'])));
+		}
 
 		return $output;
 	}
