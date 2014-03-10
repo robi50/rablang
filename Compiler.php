@@ -25,7 +25,7 @@ class Compiler{
 	private function translate($element){
 		$output = '';
 
-		// var foo = "robin";
+		// foo = "robin";
 		if($element['type'] == 'defineVar'){
 			foreach($element['variables'] as $n => $v){
 				$output .= sprintf('$%s = %s;', $n, implode('.', array_map(function($vv){
@@ -53,7 +53,7 @@ class Compiler{
 				$output .= sprintf('const %s = %d;', $v, $i++);
 			}
 		}
-		// var foo = function(){}
+		// foo = function(){}
 		elseif($element['type'] == 'defineFunction'){
 			$output .= sprintf('function %s(%s){%s}', $element['name'], implode(',', array_map(function($v){
 				return sprintf('%s', $this->tokenToValue($v));
@@ -80,7 +80,9 @@ class Compiler{
 		// import "foo";
 		elseif($element['type'] == 'import'){
 			$output .= sprintf('require "%s.php";', implode('/', explode('.', $element['path'])));
-		}elseif($element['type'] == 'importFrom'){
+		}
+		// from "fo.foo.fooo" import "foo";
+		elseif($element['type'] == 'importFrom'){
 			foreach($element['files'] as $f){
 				$output .= sprintf('require "%s.php";', implode('/', explode('.', $element['path'])).'/'.$f);
 			}

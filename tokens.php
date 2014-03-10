@@ -3,7 +3,6 @@
 namespace Rab;
 
 // keywords
-const R_VAR = 0;
 const R_PRINT = 11;
 const R_CONST = 13;
 const R_ENUM = 16;

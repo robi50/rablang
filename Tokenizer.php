@@ -152,7 +152,6 @@ class Tokenizer{
 			}
 		}
 
-		if($this->buffer == 'var') return [R_VAR];
 		if($this->buffer == 'print') return [R_PRINT];
 		if($this->buffer == 'const') return [R_CONST];
 		if($this->buffer == 'function') return [R_FUNCTION];

@@ -25,13 +25,13 @@ class Parser{
 
 	private function parseExp($d){
 		switch($d[0]){
-			case R_VAR:
-				if($d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+			case R_IDENTIFIER:
+				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
 					$tree = ['type' => 'defineVar', 'variables' => []];
-					$tree['variables'][$d[0][1]] = [$d[2]];
+					$tree['variables'][$d[1]] = [$k[1]];
 
 					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
-						$tree['variables'][$d[0][1]][] = $j[1];
+						$tree['variables'][$d[1]][] = $j[1];
 					}
 
 					while($this->tokenizer->match(R_COMA)){
@@ -44,8 +44,8 @@ class Parser{
 					}
 
 					return $tree;
-				}elseif($d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, R_FUNCTION, R_LBRACKET)){
-					$tree = ['type' => 'defineFunction', 'name' => $d[0][1], 'args' => []];
+				}elseif($this->tokenizer->match(R_EQUAL, R_FUNCTION, R_LBRACKET)){
+					$tree = ['type' => 'defineFunction', 'name' => $d[1], 'args' => []];
 
 					if($d = $this->tokenizer->match(R_IDENTIFIER)){
 						$tree['args'][] = $d[0];
@@ -60,12 +60,7 @@ class Parser{
 
 						return $tree;
 					}
-				}
-				
-				break;
-
-			case R_IDENTIFIER:
-				if($this->tokenizer->match(R_LBRACKET)){
+				}elseif($this->tokenizer->match(R_LBRACKET)){
 					$tree = ['type' => 'callFunction', 'name' => $d[1], 'args' => []];
 
 					if($d = $this->tokenizer->match([R_STRING, R_INTEGER, R_IDENTIFIER])){
