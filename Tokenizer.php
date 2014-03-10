@@ -160,6 +160,8 @@ class Tokenizer{
 		if($this->buffer == 'namespace') return [R_NAMESPACE];
 		if($this->buffer == 'import') return [R_IMPORT];
 		if($this->buffer == 'from') return [R_FROM];
+		if($this->buffer == 'true') return [R_BOOLEAN, 'true'];
+		if($this->buffer == 'false') return [R_BOOLEAN, 'false'];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}

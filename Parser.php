@@ -23,27 +23,11 @@ class Parser{
 		return $tree;
 	}
 
-	private function parseCallFunction($d){
-		$tree = ['type' => 'callFunction', 'name' => $d[1], 'args' => []];
-
-		if($d = $this->tokenizer->match([R_STRING, R_INTEGER, R_IDENTIFIER])){
-			$tree['args'][] = $d[0];
-
-			while($d = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
-				$tree['args'][] = $d[1];
-			}
-		}elseif($this->tokenizer->match(R_RBRACKET)){
-			return $tree;
-		}
-
-		return $tree;
-	}
-
 	private function parseExp($d){
 		switch($d[0]){
 			case R_IDENTIFIER:
 				// name = "robin";
-				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 					$tree = ['type' => 'defineVar', 'variables' => []];
 
 					if($k[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
@@ -52,7 +36,7 @@ class Parser{
 						$tree['variables'][$d[1]] = [$k[1]];
 					}
 
-					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 						if($j[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
 							$tree['variables'][$d[1]][] = [$this->parseCallFunction($j[1])];
 						}else{
@@ -61,10 +45,10 @@ class Parser{
 					}
 
 					while($this->tokenizer->match(R_COMA)){
-						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER]);
+						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN]);
 						$tree['variables'][$d[0][1]] = [$d[2]];
 
-						while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+						while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 							$tree['variables'][$d[0][1]][] = $j[1];
 						}
 					}
@@ -100,10 +84,10 @@ class Parser{
 						$names[] = $j[1][1];
 					}
 
-					if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+					if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 						$values[$a] = [$j[1]];
 
-						while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+						while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 							$values[$a][] = $z[1];
 						}
 
@@ -117,10 +101,10 @@ class Parser{
 						}
 						// else: a, b, c = 1, 2, 3;
 						else{
-							while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+							while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 								$values[++$a] = [$j[1]];
 
-								while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+								while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 									$values[$a][] = $z[1];
 								}
 							}
@@ -188,7 +172,7 @@ class Parser{
 				break;
 
 			case R_RETURN:
-				if($d = $this->tokenizer->match([R_INTEGER, R_STRING, R_IDENTIFIER])){
+				if($d = $this->tokenizer->match([R_INTEGER, R_STRING, R_IDENTIFIER, R_BOOLEAN])){
 					$tree = ['type' => 'return', 'value' => []];
 
 					if($d[0][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
@@ -197,7 +181,7 @@ class Parser{
 						$tree['value'][] = $d[0];
 					}
 
-					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 						if($j[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
 							$tree['value'][] = [$this->parseCallFunction($j[1])];
 						}else{
@@ -243,6 +227,22 @@ class Parser{
 				break;
 
 		}
+	}
+
+	private function parseCallFunction($d){
+		$tree = ['type' => 'callFunction', 'name' => $d[1], 'args' => []];
+
+		if($d = $this->tokenizer->match([R_STRING, R_INTEGER, R_IDENTIFIER])){
+			$tree['args'][] = $d[0];
+
+			while($d = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+				$tree['args'][] = $d[1];
+			}
+		}elseif($this->tokenizer->match(R_RBRACKET)){
+			return $tree;
+		}
+
+		return $tree;
 	}
 
 	private function getToken(){

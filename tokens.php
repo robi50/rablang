@@ -28,3 +28,4 @@ const R_ARGUMENTS = 21;
 // types
 const R_INTEGER = 9;
 const R_STRING = 10;
+const R_BOOLEAN = 28;
