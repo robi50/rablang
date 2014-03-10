@@ -56,12 +56,21 @@ class Parser{
 					return $tree;
 				}elseif($this->tokenizer->match(R_EQUAL, R_FUNCTION, R_LBRACKET)){
 					$tree = ['type' => 'defineFunction', 'name' => $d[1], 'args' => []];
+					$i = 0;
 
 					if($d = $this->tokenizer->match(R_IDENTIFIER)){
-						$tree['args'][] = $d[0];
+						$tree['args'][$i] = [$d[0]];
+
+						if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
+							$tree['args'][$i++][] = $j[1];
+						}
 
 						while($d = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
-							$tree['args'][] = $d[1];
+							$tree['args'][$i] = [$d[1]];
+
+							if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
+								$tree['args'][$i++][] = $j[1];
+							}
 						}
 					}
 

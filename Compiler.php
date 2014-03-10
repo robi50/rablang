@@ -56,7 +56,11 @@ class Compiler{
 		// foo = function(){}
 		elseif($element['type'] == 'defineFunction'){
 			$output .= sprintf('function %s(%s){%s}', $element['name'], implode(',', array_map(function($v){
-				return sprintf('%s', $this->tokenToValue($v));
+				$arg = sprintf('%s', $this->tokenToValue($v[0]));
+
+				if(isset($v[1])) $arg .= '=' . $this->tokenToValue($v[1]);
+
+				return $arg;
 			}, $element['args'])),implode('', array_map(function($e){
 				return $this->translate($e);
 			}, $element['inner'])));
