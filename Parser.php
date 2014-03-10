@@ -151,17 +151,27 @@ class Parser{
 				break;
 
 			case R_PRINT:
-				$tree = ['type' => 'print', 'values' => []];
-
 				if($d = $this->tokenizer->match([R_IDENTIFIER, R_STRING, R_INTEGER])){
-					$tree['values'][] = $d[0];	
+					$tree = ['type' => 'print', 'values' => []];
+
+					if($d[0][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
+						$tree['values'][] = $this->parseCallFunction($d[0]);
+						$this->tokenizer->match(R_RBRACKET);
+					}else{
+						$tree['values'][] = $d[0];
+					}
 
 					while($d = $this->tokenizer->match(R_DOT, [R_IDENTIFIER, R_STRING])){
-						$tree['values'][] = $d[1];	
-					}
-				}
+						if($d[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
+							$tree['values'][] = $this->parseCallFunction($d[1]);
+						}else{
+							$tree['values'][] = $d[1];
+						}
 
-				return $tree;
+					}
+
+					return $tree;
+				}
 				break;
 
 			case R_ENUM:

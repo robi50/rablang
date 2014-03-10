@@ -63,9 +63,7 @@ class Compiler{
 		}
 		// foo();
 		elseif($element['type'] == 'callFunction'){
-			$output .= sprintf('%s(%s);', $element['name'], implode(',', array_map(function($v){
-				return sprintf('%s', $this->tokenToValue($v));
-			}, $element['args'])));
+			$output .= $this->compileCallFunction($element['name'], $element['args']) . ';';
 		}
 		// return foo;
 		elseif($element['type'] == 'return'){
@@ -93,6 +91,12 @@ class Compiler{
 		return $output;
 	}
 
+	private function compileCallFunction($name, $args){
+		return sprintf('%s(%s)', $name, implode(',', array_map(function($v){
+				return sprintf('%s', $this->tokenToValue($v));
+		}, $args)));
+	}
+
 	/* 
 		2 => 2
 		foo fo ao => "foo fo ao"
@@ -100,7 +104,7 @@ class Compiler{
 		NAME => NAME
 	*/
 	private function tokenToValue($t){
-		if(isset($t['type']) && $t['type'] == 'callFunction') return $this->translate($t);	
+		if(isset($t['type']) && $t['type'] == 'callFunction') return $this->compileCallFunction($t['name'], $t['args']);	
 		if($t[0] == R_INTEGER) return $t[1];
 		if($t[0] == R_STRING) return '"'. $t[1] .'"';
 		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $t[1])) ? $t[1] : '$'. $t[1];
