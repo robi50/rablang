@@ -74,6 +74,39 @@ class Parser{
 					}
 
 					return $tree;
+				}elseif($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
+					$tree = ['type' => 'defineVar', 'variables' => []];
+					$names = [$d[1], $j[1][1]];
+					$values = [];
+					$a = 0;
+
+					while($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
+						$names[] = $j[1][1];
+					}
+
+					if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+						$values[$a] = [$j[1]];
+
+						while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+							$values[$a][] = $z[1];
+						}
+
+						while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+							$values[++$a] = [$j[1]];
+
+							while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+								$values[$a][] = $z[1];
+							}
+						}
+
+						for($i = 0; $i < count($names); $i++){
+							$tree['variables'][$names[$i]] = $values[$i];
+						} 
+
+						print_r($tree);
+
+						return $tree;
+					}
 				}
 				break;
 
