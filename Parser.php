@@ -26,6 +26,7 @@ class Parser{
 	private function parseExp($d){
 		switch($d[0]){
 			case R_IDENTIFIER:
+				// name = "robin";
 				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER])){
 					$tree = ['type' => 'defineVar', 'variables' => []];
 					$tree['variables'][$d[1]] = [$k[1]];
@@ -74,7 +75,9 @@ class Parser{
 					}
 
 					return $tree;
-				}elseif($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
+				}
+				// name, surname = "robin", "yildiz";
+				elseif($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
 					$tree = ['type' => 'defineVar', 'variables' => []];
 					$names = [$d[1], $j[1][1]];
 					$values = [];
@@ -91,21 +94,30 @@ class Parser{
 							$values[$a][] = $z[1];
 						}
 
-						while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
-							$values[++$a] = [$j[1]];
-
-							while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
-								$values[$a][] = $z[1];
+						// if: a, b, c = 3;
+						if($this->tokenizer->match(R_SEMIC)){
+							for($i = 0; $i < count($names); $i++){
+								$tree['variables'][$names[$i]] = $values[0];
 							}
+
+							return $tree;
 						}
+						// else: a, b, c = 1, 2, 3;
+						else{
+							while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+								$values[++$a] = [$j[1]];
 
-						for($i = 0; $i < count($names); $i++){
-							$tree['variables'][$names[$i]] = $values[$i];
-						} 
+								while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER])){
+									$values[$a][] = $z[1];
+								}
+							}
 
-						print_r($tree);
+							for($i = 0; $i < count($names); $i++){
+								$tree['variables'][$names[$i]] = $values[$i];
+							} 
 
-						return $tree;
+							if($this->tokenizer->match(R_SEMIC)) return $tree;
+						}
 					}
 				}
 				break;
