@@ -69,7 +69,9 @@ class Compiler{
 		}
 		// return foo;
 		elseif($element['type'] == 'return'){
-			$output .= sprintf('return %s;', $this->tokenToValue($element['value']));
+			$output .= sprintf('return %s;', implode('.', array_map(function($v){
+					return $this->tokenToValue($v);
+			}, $element['value'])));
 		}
 		// namespace foo{}
 		elseif($element['type'] == 'namespace'){
@@ -97,7 +99,8 @@ class Compiler{
 		name => $name
 		NAME => NAME
 	*/
-	private function tokenToValue($t){	
+	private function tokenToValue($t){
+		if(isset($t['type']) && $t['type'] == 'callFunction') return $this->translate($t);	
 		if($t[0] == R_INTEGER) return $t[1];
 		if($t[0] == R_STRING) return '"'. $t[1] .'"';
 		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $t[1])) ? $t[1] : '$'. $t[1];
