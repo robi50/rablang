@@ -185,14 +185,14 @@ class Parser{
 					$tree = ['type' => 'return', 'value' => []];
 
 					if($d[0][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
-						$tree['value'][] = [$this->parseCallFunction($d[0])];
+						$tree['value'][] = $this->parseCallFunction($d[0]);
 					}else{
 						$tree['value'][] = $d[0];
 					}
 
 					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
 						if($j[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
-							$tree['value'][] = [$this->parseCallFunction($j[1])];
+							$tree['value'][] = $this->parseCallFunction($j[1]);
 						}else{
 							$tree['value'][] = $j[1];
 						}
@@ -239,7 +239,7 @@ class Parser{
 				if($d = $this->tokenizer->match(R_LBRACKET, R_INTEGER, R_RBRACKET, R_LCBRACKET)){
 					$tree = ['type' => 'loop', 'limit' => $d[1][1]];
 					$tree['inner'] = $this->parse(R_RCBRACKET);
-					
+
 					return $tree;
 				}
 				break;
