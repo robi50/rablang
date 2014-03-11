@@ -166,6 +166,7 @@ class Tokenizer{
 		if($this->buffer == 'public') return [R_VISIBILITY, 'public'];
 		if($this->buffer == 'private') return [R_VISIBILITY, 'private'];
 		if($this->buffer == 'protected') return [R_VISIBILITY, 'protected'];
+		if($this->buffer == 'class') return [R_CLASS];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}

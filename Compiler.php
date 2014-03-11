@@ -97,6 +97,12 @@ class Compiler{
 				return $this->translate($e);
 			}, $element['inner'])));
 		}
+		// class Foo{}
+		elseif($element['type'] == 'defineClass'){
+			$output .= sprintf('class %s{%s}', $element['name'], implode('', array_map(function($e){
+				return $this->translate($e);
+			}, $element['inner'])));
+		}
 
 		return $output;
 	}

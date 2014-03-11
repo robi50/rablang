@@ -13,6 +13,7 @@ const R_IMPORT = 26;
 const R_FROM = 27;
 const R_LOOP = 29;
 const R_VISIBILITY = 30;
+const R_CLASS = 31;
 
 const R_COMA = 3;
 const R_DOT = 4;
