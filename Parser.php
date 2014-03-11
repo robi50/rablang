@@ -25,10 +25,24 @@ class Parser{
 
 	private function parseExp($d){
 		switch($d[0]){
+
+			case R_VISIBILITY:
 			case R_IDENTIFIER:
+				// visibility value init
+				$v = null;
+
+				if($d[0] == R_VISIBILITY){
+					if($j = $this->tokenizer->match(R_IDENTIFIER)){
+						$v = $d[1];
+						$d = $j[0];	
+					}else{
+						$this->abort('Expected: `R_IDENTIFIER`.');
+					}
+				}
+
 				// name = "robin";
 				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-					$tree = ['type' => 'defineVar', 'variables' => []];
+					$tree = ['type' => 'defineVar', 'variables' => [], 'visibility' => $v];
 
 					if($k[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
 						$tree['variables'][$d[1]] = [$this->parseCallFunction($k[1])];
@@ -55,7 +69,7 @@ class Parser{
 
 					return $tree;
 				}elseif($this->tokenizer->match(R_EQUAL, R_FUNCTION, R_LBRACKET)){
-					$tree = ['type' => 'defineFunction', 'name' => $d[1], 'args' => []];
+					$tree = ['type' => 'defineFunction', 'name' => $d[1], 'args' => [], 'visibility' => $v];
 					$i = 0;
 
 					if($d = $this->tokenizer->match(R_IDENTIFIER)){
@@ -84,7 +98,7 @@ class Parser{
 				}
 				// name, surname = "robin", "yildiz";
 				elseif($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
-					$tree = ['type' => 'defineVar', 'variables' => []];
+					$tree = ['type' => 'defineVar', 'variables' => [], 'visibility' => $v];
 					$names = [$d[1], $j[1][1]];
 					$values = [];
 					$a = 0;

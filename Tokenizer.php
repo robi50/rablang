@@ -163,6 +163,9 @@ class Tokenizer{
 		if($this->buffer == 'true') return [R_BOOLEAN, 'true'];
 		if($this->buffer == 'false') return [R_BOOLEAN, 'false'];
 		if($this->buffer == 'loop') return [R_LOOP];
+		if($this->buffer == 'public') return [R_VISIBILITY, 'public'];
+		if($this->buffer == 'private') return [R_VISIBILITY, 'private'];
+		if($this->buffer == 'protected') return [R_VISIBILITY, 'protected'];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}

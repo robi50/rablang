@@ -19,8 +19,6 @@ class Compiler{
 			$this->output .= $this->translate($element);
 		}
 
-		echo $this->output;
-
 		return $this->output;
 	}
 
@@ -30,7 +28,7 @@ class Compiler{
 		// foo = "robin";
 		if($element['type'] == 'defineVar'){
 			foreach($element['variables'] as $n => $v){
-				$output .= sprintf('$%s = %s;', $n, implode('.', array_map(function($vv){
+				$output .= sprintf('%s$%s = %s;', $element['visibility'] ? $element['visibility'].' ' : '', $n, implode('.', array_map(function($vv){
 					return $this->tokenToValue($vv);
 				}, $v)));
 			}
@@ -57,7 +55,7 @@ class Compiler{
 		}
 		// foo = function(){}
 		elseif($element['type'] == 'defineFunction'){
-			$output .= sprintf('function %s(%s){%s}', $element['name'], implode(',', array_map(function($v){
+			$output .= sprintf('%sfunction %s(%s){%s}', $element['visibility'] ? $element['visibility'].' ' : '', $element['name'], implode(',', array_map(function($v){
 				$arg = sprintf('%s', $this->tokenToValue($v[0]));
 
 				if(isset($v[1])) $arg .= '=' . $this->tokenToValue($v[1]);
