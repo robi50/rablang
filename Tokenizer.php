@@ -76,7 +76,7 @@ class Tokenizer{
 				$this->buffer = $c;
 
 				return $this->buildInteger();
-			}elseif(ctype_alpha($c)){
+			}elseif(preg_match('/^[a-zA-Z_]$/', $c)){
 				$this->i++;
 				$this->buffer = $c;
 
