@@ -14,6 +14,9 @@ const R_FROM = 27;
 const R_LOOP = 29;
 const R_VISIBILITY = 30;
 const R_CLASS = 31;
+const R_NEW = 32;
+const R_THIS = 33;
+const R_OBJ_OP = 34;
 
 const R_COMA = 3;
 const R_DOT = 4;

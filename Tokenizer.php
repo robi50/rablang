@@ -35,6 +35,16 @@ class Tokenizer{
 						break;
 					}
 				}
+			}elseif($c == '-'){
+				$this->i++;
+
+				while($this->i < $this->len){
+					if($this->source[$this->i] == '>'){
+						return [R_OBJ_OP];
+					}else{
+						break;
+					}
+				}
 			}elseif($c == ';'){
 				$this->i++;
 
@@ -167,6 +177,8 @@ class Tokenizer{
 		if($this->buffer == 'private') return [R_VISIBILITY, 'private'];
 		if($this->buffer == 'protected') return [R_VISIBILITY, 'protected'];
 		if($this->buffer == 'class') return [R_CLASS];
+		if($this->buffer == 'new') return [R_NEW];
+		if($this->buffer == 'this') return [R_THIS];
 
 		return [R_IDENTIFIER, $this->buffer];
 	}
