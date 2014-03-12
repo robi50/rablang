@@ -6,6 +6,8 @@ class Parser{
 
 	private $tokenizer = null;
 
+	private $variablePrefixs = [];
+
 	public function __construct($tokenizer){
 		$this->tokenizer = $tokenizer;
 	}
@@ -23,82 +25,100 @@ class Parser{
 		return $tree;
 	}
 
+	// foo = {value} | const foo = {value}
+	private function parseValue($conf){
+		if($d = $this->tokenizer->match([R_STRING, R_INTEGER, R_BOOLEAN])){
+			return ['type' => 'native', 'value' => $d[0]];
+		}elseif($d = $this->tokenizer->match(R_IDENTIFIER, R_LBRACKET)){
+			return $this->parseCallFunction($d[0]);
+		}elseif($d = $this->tokenizer->match(R_FUNCTION, R_LBRACKET)){
+			$tree = ['type' => 'defineFunction', 'name' => $conf['name'], 'args' => [], 'visibility' => $conf['visibility']];
+			$i = 0;
+
+			if($d = $this->tokenizer->match(R_IDENTIFIER)){
+				$tree['args'][$i] = [$d[0]];
+
+				if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
+					$tree['args'][$i++][] = $j[1];
+				}
+
+				while($d = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
+					$tree['args'][$i] = [$d[1]];
+
+					if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
+						$tree['args'][$i++][] = $j[1];
+					}
+				}
+			}
+
+			if($this->tokenizer->match(R_RBRACKET, R_LCBRACKET)){
+				$tree['inner'] = $this->parse(R_RCBRACKET);
+
+				return $tree;
+			}
+		}elseif($d = $this->tokenizer->match(R_IDENTIFIER)){
+			return ['type' => 'native', 'value' => $d[0]];
+		}
+	}
+
 	private function parseExp($d){
 		switch($d[0]){
 
+			case R_CONST:
 			case R_VISIBILITY:
 			case R_IDENTIFIER:
-				// visibility value init
-				$v = null;
-
 				if($d[0] == R_VISIBILITY){
 					if($j = $this->tokenizer->match(R_IDENTIFIER)){
-						$v = $d[1];
+						$this->variablePrefixs[] = $d[1];
 						$d = $j[0];	
+					}elseif($j = $this->tokenizer->match(R_CONST, R_IDENTIFIER)){
+						$this->variablePrefixs[] = $d[1];
+						$this->variablePrefixs[] = 'const';
+						$d = $j[1];	
 					}else{
 						$this->abort('Expected: `R_IDENTIFIER`.');
 					}
+				}elseif($d[0] == R_CONST){
+					$this->variablePrefixs[] = 'const';
 				}
 
 				// name = "robin";
-				if($k = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-					$tree = ['type' => 'defineVar', 'variables' => [], 'visibility' => $v];
+				if($k = $this->tokenizer->match(R_EQUAL)){
+					$tree = ['type' => 'defineVar', 'variables' => [], 'prefixs' => $this->variablePrefixs];
 
-					if($k[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
-						$tree['variables'][$d[1]] = [$this->parseCallFunction($k[1])];
-					}else{
-						$tree['variables'][$d[1]] = [$k[1]];
-					}
+					$tree['variables'][$d[1]] = [$this->parseValue(['name' => $d[1], 'prefixs' => $this->variablePrefixs])];
 
-					while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-						if($j[1][0] == R_IDENTIFIER && $this->tokenizer->match(R_LBRACKET)){
-							$tree['variables'][$d[1]][] = [$this->parseCallFunction($j[1])];
-						}else{
-							$tree['variables'][$d[1]][] = $j[1];
-						}
+					while($j = $this->tokenizer->match(R_DOT)){
+						$tree['variables'][$d[1]][] = $this->parseValue(['name' => $d[1], 'prefixs' => $this->variablePrefixs]);
 					}
 
 					while($this->tokenizer->match(R_COMA)){
-						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN]);
-						$tree['variables'][$d[0][1]] = [$d[2]];
+						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL);
+						$tree['variables'][$d[0][1]] = $this->parseValue(['name' => $d[0][1], 'prefixs' => $this->variablePrefixs]);
 
-						while($j = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-							$tree['variables'][$d[0][1]][] = $j[1];
+						while($j = $this->tokenizer->match(R_DOT)){
+							$tree['variables'][$d[0][1]][] = $this->parseValue(['name' => $d[0][1], 'prefixs' => $this->variablePrefixs]);
 						}
 					}
+
+					// convert variables names to uppercase if const
+					if(in_array('const', $this->variablePrefixs)){
+						foreach($tree['variables'] as $n => $v){
+							unset($tree['variables'][$n]);
+							$tree['variables'][strtoupper($n)] = $v;
+						}
+					}
+
+					// flush variables prefixs
+					$this->variablePrefixs = [];
 
 					return $tree;
-				}elseif($this->tokenizer->match(R_EQUAL, R_FUNCTION, R_LBRACKET)){
-					$tree = ['type' => 'defineFunction', 'name' => $d[1], 'args' => [], 'visibility' => $v];
-					$i = 0;
-
-					if($d = $this->tokenizer->match(R_IDENTIFIER)){
-						$tree['args'][$i] = [$d[0]];
-
-						if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
-							$tree['args'][$i++][] = $j[1];
-						}
-
-						while($d = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
-							$tree['args'][$i] = [$d[1]];
-
-							if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_BOOLEAN])){
-								$tree['args'][$i++][] = $j[1];
-							}
-						}
-					}
-
-					if($this->tokenizer->match(R_RBRACKET, R_LCBRACKET)){
-						$tree['inner'] = $this->parse(R_RCBRACKET);
-
-						return $tree;
-					}
 				}elseif($this->tokenizer->match(R_LBRACKET)){
 					return $this->parseCallFunction($d);
 				}
 				// name, surname = "robin", "yildiz";
 				elseif($j = $this->tokenizer->match(R_COMA, R_IDENTIFIER)){
-					$tree = ['type' => 'defineVar', 'variables' => [], 'visibility' => $v];
+					$tree = ['type' => 'defineVar', 'variables' => [], 'prefixs' => $this->variablePrefixs];
 					$names = [$d[1], $j[1][1]];
 					$values = [];
 					$a = 0;
@@ -107,28 +127,20 @@ class Parser{
 						$names[] = $j[1][1];
 					}
 
-					if($j = $this->tokenizer->match(R_EQUAL, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-						$values[$a] = [$j[1]];
+					if($j = $this->tokenizer->match(R_EQUAL)){
+						$values[$a] = [$this->parseValue(['name' => $names[$a], 'prefixs' => $this->variablePrefixs])];
 
-						while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-							$values[$a][] = $z[1];
+						while($z = $this->tokenizer->match(R_DOT)){
+							$values[$a][] = $this->parseValue(['name' => $names[$a], 'prefixs' => $this->variablePrefixs]);
 						}
 
-						// if: a, b, c = 3;
-						if($this->tokenizer->match(R_SEMIC)){
-							for($i = 0; $i < count($names); $i++){
-								$tree['variables'][$names[$i]] = $values[0];
-							}
+						// if: a, b, c = 1, 2, 3;
+						if($this->tokenizer->match(R_COMA)){
+														while($j = $this->tokenizer->match(R_COMA)){
+								$values[++$a] = [$this->parseValue(['name' => $names[$a], 'prefixs' => $this->variablePrefixs])];
 
-							return $tree;
-						}
-						// else: a, b, c = 1, 2, 3;
-						else{
-							while($j = $this->tokenizer->match(R_COMA, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-								$values[++$a] = [$j[1]];
-
-								while($z = $this->tokenizer->match(R_DOT, [R_STRING, R_INTEGER, R_IDENTIFIER, R_BOOLEAN])){
-									$values[$a][] = $z[1];
+								while($z = $this->tokenizer->match(R_DOT)){
+									$values[$a][] = $this->parseValue(['name' => $names[$a], 'prefixs' => $this->variablePrefixs]);
 								}
 							}
 
@@ -136,25 +148,36 @@ class Parser{
 								$tree['variables'][$names[$i]] = $values[$i];
 							} 
 
+							// convert variables names to uppercase if const
+							if(in_array('const', $this->variablePrefixs)){
+								foreach($tree['variables'] as $n => $v){
+									unset($tree['variables'][$n]);
+									$tree['variables'][strtoupper($n)] = $v;
+								}
+							}
+
 							if($this->tokenizer->match(R_SEMIC)) return $tree;
 						}
+						// else: a, b, c = 3;
+						else{
+							for($i = 0; $i < count($names); $i++){
+								$tree['variables'][$names[$i]] = $values[0];
+							}
+
+							// convert variables names to uppercase if const
+							if(in_array('const', $this->variablePrefixs)){
+								foreach($tree['variables'] as $n => $v){
+									unset($tree['variables'][$n]);
+									$tree['variables'][strtoupper($n)] = $v;
+								}
+							}
+
+							return $tree;
+						}
 					}
+
+					$this->variablePrefixs = [];
 				}
-				break;
-
-			case R_CONST:
-				$tree = ['type' => 'defineConst', 'variables' => []];
-
-				if($d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER])){
-					$tree['variables'][strtoupper($d[0][1])] = $d[2][1];
-
-					while($this->tokenizer->match(R_COMA)){
-						$d = $this->tokenizer->match(R_IDENTIFIER, R_EQUAL, [R_STRING, R_INTEGER]);
-						$tree['variables'][strtoupper($d[0][1])] = $d[2][1];
-					}
-				}
-				
-				return $tree;
 				break;
 
 			case R_PRINT:

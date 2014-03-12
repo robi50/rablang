@@ -19,6 +19,8 @@ class Compiler{
 			$this->output .= $this->translate($element);
 		}
 
+		echo $this->output;
+
 		return $this->output;
 	}
 
@@ -28,7 +30,7 @@ class Compiler{
 		// foo = "robin";
 		if($element['type'] == 'defineVar'){
 			foreach($element['variables'] as $n => $v){
-				$output .= sprintf('%s$%s = %s;', $element['visibility'] ? $element['visibility'].' ' : '', $n, implode('.', array_map(function($vv){
+				$output .= sprintf('%s%s%s = %s;', implode(' ', $element['prefixs']).' ', in_array('const', $element['prefixs']) ? '' : '$',$n, implode('.', array_map(function($vv){
 					return $this->tokenToValue($vv);
 				}, $v)));
 			}
@@ -36,7 +38,7 @@ class Compiler{
 		// const FOO = 2;
 		elseif($element['type'] == 'defineConst'){
 			foreach($element['variables'] as $n => $v){
-				$output .= sprintf('const %s = "%s";', $n, $v);
+				$output .= sprintf('const %s = %s;', $n, $this->tokenToValue($v));
 			}
 		}
 		// print foo;
@@ -119,12 +121,26 @@ class Compiler{
 		name => $name
 		NAME => NAME
 	*/
-	private function tokenToValue($t){
-		if(isset($t['type']) && $t['type'] == 'callFunction') return $this->compileCallFunction($t['name'], $t['args']);	
-		if($t[0] == R_INTEGER) return $t[1];
-		if($t[0] == R_STRING) return '"'. $t[1] .'"';
-		if($t[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $t[1])) ? $t[1] : '$'. $t[1];
-		if($t[0] == R_BOOLEAN) return $t[1];
+	private function tokenToValue($e){
+		if(isset($e['type'])){
+			if($e['type'] == 'native'){
+				$v = $e['value'];
+
+				if($v[0] == R_INTEGER) return $v[1];
+				if($v[0] == R_STRING) return '"'. $v[1] .'"';
+				if($v[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $v[1])) ? $v[1] : '$'. $v[1];
+				if($v[0] == R_BOOLEAN) return $v[1];
+			}elseif($e['type'] == 'callFunction'){
+				return $this->compileCallFunction($e['name'], $e['args']);	
+			}elseif($e['type'] == 'defineFunction'){
+				return $this->translate($e);
+			}
+		}else{
+			if($e[0] == R_INTEGER) return $e[1];
+			if($e[0] == R_STRING) return '"'. $e[1] .'"';
+			if($e[0] == R_IDENTIFIER) return (preg_match('/^[A-Z_]+$/', $e[1])) ? $e[1] : '$'. $e[1];
+			if($e[0] == R_BOOLEAN) return $e[1];
+		}
 	}
 
 }
