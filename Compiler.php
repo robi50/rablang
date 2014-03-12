@@ -19,8 +19,6 @@ class Compiler{
 			$this->output .= $this->translate($element);
 		}
 
-		echo $this->output;
-
 		return $this->output;
 	}
 
@@ -134,6 +132,8 @@ class Compiler{
 				return $this->compileCallFunction($e['name'], $e['args']);	
 			}elseif($e['type'] == 'defineFunction'){
 				return $this->translate($e);
+			}elseif($e['type'] == 'newInstance'){
+				return 'new ' . $this->translate($e['call']);
 			}
 		}else{
 			if($e[0] == R_INTEGER) return $e[1];

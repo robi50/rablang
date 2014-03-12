@@ -33,6 +33,8 @@ class Parser{
 			return $this->parseCallFunction($d[0]);
 		}elseif($d = $this->tokenizer->match(R_IDENTIFIER)){
 			return ['type' => 'native', 'value' => $d[0]];
+		}elseif($d = $this->tokenizer->match(R_NEW, R_IDENTIFIER, R_LBRACKET)){
+			return ['type' => 'newInstance', 'call' => $this->parseCallFunction($d[1])];
 		}
 	}
 
@@ -85,6 +87,8 @@ class Parser{
 
 					if($this->tokenizer->match(R_RBRACKET, R_LCBRACKET)){
 						$tree['inner'] = $this->parse(R_RCBRACKET);
+					
+						$this->variablePrefixs = [];
 
 						return $tree;
 					}	
@@ -179,11 +183,11 @@ class Parser{
 								}
 							}
 
+							$this->variablePrefixs = [];
+
 							return $tree;
 						}
 					}
-
-					$this->variablePrefixs = [];
 				}
 				break;
 

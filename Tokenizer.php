@@ -40,6 +40,8 @@ class Tokenizer{
 
 				while($this->i < $this->len){
 					if($this->source[$this->i] == '>'){
+						$this->i++;
+						
 						return [R_OBJ_OP];
 					}else{
 						break;
